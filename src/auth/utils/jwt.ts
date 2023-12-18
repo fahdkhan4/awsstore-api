@@ -10,6 +10,7 @@ export const generateAccessToken = (user: AuthDocument): string => {
     userId: user._id,
     email: user.email,
     role: user.role,
+    accountType: user.accountType,
   };
 
   return jwt.sign(payload, secretKey, { expiresIn: accessTokenTtl });

@@ -1,4 +1,3 @@
-import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
 import { Error as MongooseError } from "mongoose";
 

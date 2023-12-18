@@ -16,12 +16,7 @@ router.post("/register", handleAsyncErrors(register), handleValidationErrors);
 router.post("/login", handleAsyncErrors(login), handleValidationErrors);
 
 //Needs Fixing
-router.put(
-  "/:username",
-  authenticate,
-  handleAsyncErrors(updateUser),
-  handleAsyncErrors
-);
+router.put("/:username", authenticate, handleAsyncErrors(updateUser));
 
 router.delete(
   "/:id",

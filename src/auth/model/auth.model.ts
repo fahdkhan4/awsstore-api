@@ -25,15 +25,20 @@ const authSchema = new mongoose.Schema<AuthDocument>({
     unique: true,
     validate: {
       validator: async function (value: string) {
-        const existingUser = await (
-          this.constructor as AuthModel
-        ).findOneByUsername(value);
-        if (existingUser) {
-          const randomString = generateRandomString(2);
-          const suggestedUsername = `${value}_${randomString}`;
-          throw new Error(
-            `Username ${value} is already taken. Suggested: ${suggestedUsername}`
-          );
+        const context: any = this;
+        const isUsernameModified =
+          context.isNew || context.isModified("username");
+        if (isUsernameModified) {
+          const existingUser = await (
+            this.constructor as AuthModel
+          ).findOneByUsername(value);
+          if (existingUser) {
+            const randomString = generateRandomString(2);
+            const suggestedUsername = `${value}_${randomString}`;
+            throw new Error(
+              `Username ${value} is already taken. Suggested: ${suggestedUsername}`
+            );
+          }
         }
         return true;
       },
