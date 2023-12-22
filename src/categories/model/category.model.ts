@@ -14,6 +14,11 @@ const categorySchema = new mongoose.Schema<CategoryDocument>({
   name: { required: true, type: String, index: true, unique: true },
   description: { required: true, type: String },
   tags: [{ type: String, required: true }],
+  status: {
+    type: String,
+    enum: ["publish", "draft", "deleted"],
+    default: "draft",
+  },
   createdAt: { type: Date },
   updatedAt: { type: Date },
 });

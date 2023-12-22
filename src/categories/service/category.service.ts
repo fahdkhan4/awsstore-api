@@ -15,15 +15,14 @@ export class CategoryService {
     size?: number;
     lastObjectId?: string;
   }) => {
-    if (!lastObjectId && pageNumber) {
-      query.skip(size * (pageNumber - 1));
-    }
+    const resultSize = size && size <= 50 ? size : PAGE_SIZE;
 
-    if (lastObjectId) {
-      query.gt("_id", new Types.ObjectId(lastObjectId));
-    }
+    if (!lastObjectId && pageNumber) query.skip(resultSize * (pageNumber - 1));
 
-    return query.limit(size);
+    if (lastObjectId)
+      query.gt("_id", new mongoose.Types.ObjectId(lastObjectId));
+
+    return query.limit(resultSize);
   };
 
   getCategoryPaginatedFromDB = async ({
@@ -43,7 +42,12 @@ export class CategoryService {
   }): Promise<Document[]> => {
     let queryFilter: Record<string, string | any> = { status };
 
-    if (name) queryFilter.name = new RegExp(name, "i");
+    if (name) {
+      queryFilter = {
+        ...queryFilter,
+        name: new RegExp(name, "i"),
+      };
+    }
 
     if (tags && Array.isArray(tags)) {
       const tagsPattern = tags.map((tag) => `(${tag})`).join("|");
@@ -52,13 +56,16 @@ export class CategoryService {
       queryFilter.tags = new RegExp(tags, "i");
     }
 
-    const query = CategoryModel.find(queryFilter);
+    let query = CategoryModel.find(queryFilter);
+
+    // Add additional conditions to the query
+    if (lastObjectId)
+      query = query.where("_id").gt(new Types.ObjectId(lastObjectId) as any);
 
     const queryWithPagination = this.getCategoryPaginationQuery({
       query,
       size,
       pageNumber,
-      lastObjectId,
     });
 
     const categories = await queryWithPagination.exec();
