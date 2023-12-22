@@ -8,49 +8,42 @@ export const createCategory = async (req: Request, res: Response) => {
   res.status(201).json(category);
 };
 
-export const getCategoryById = async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const getCategories = async (req: Request, res: Response) => {
+  const status = req.query.status === "draft" ? "draft" : "publish";
+  const pageNumber = req.query.page
+    ? parseInt(req.query.page as string)
+    : undefined;
+  const size = req.query.size ? parseInt(req.query.size as string) : undefined;
+  const lastObjectId = req.query.lastId as string;
+  const name = req.query.name as string;
+  const tags = req.query.tags as string[];
 
-  const category = await categoryService.getCategoryById(id);
+  const categories = await categoryService.getCategoryPaginatedFromDB({
+    status,
+    name,
+    pageNumber,
+    size,
+    tags,
+    lastObjectId,
+  });
 
-  if (category) {
-    res.json(category);
-  } else {
-    res.status(404).json({ error: "Category not found" });
-  }
+  res.status(200).json(categories);
 };
 
-export const getAllCategories = async (req: Request, res: Response) => {
-  const categories = await categoryService.getAllCategories(
-    Number(req.query.page),
-    Number(req.query.per_page)
-  );
-
-  res.json(categories);
+export const getCategoryById = async (req: Request, res: Response) => {
+  const category = await categoryService.getCategoryById(req.params.id);
+  res.status(200).json(category);
 };
 
 export const updateCategory = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  const category = await categoryService.updateCategory(id, req.body);
-
-  if (category) {
-    res.json(category);
-  } else {
-    res.status(404).json({ error: "Category not found" });
-  }
+  const category = await categoryService.updateCategory(
+    req.params.id,
+    req.body
+  );
+  res.status(200).json(category);
 };
 
 export const deleteCategory = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  const deletionResult = await categoryService.deleteCategory(id);
-
-  if (deletionResult) {
-    res.json({
-      message: "Category Deleted Successfully",
-    });
-  } else {
-    res.status(404).json({ error: "Category not found" });
-  }
+  const category = await categoryService.deleteCategory(req.params.id);
+  res.status(200).json(category);
 };

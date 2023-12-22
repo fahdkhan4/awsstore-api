@@ -8,15 +8,12 @@ export const authenticate = (
 ) => {
   const accessToken = req.headers.authorization?.split(" ")[1];
 
-  if (!accessToken) {
+  if (!accessToken)
     return res.status(401).json({ error: "Access token not provided" });
-  }
 
   const user = verifyAccessToken(accessToken);
 
-  if (!user) {
-    return res.status(401).json({ error: "Invalid access token" });
-  }
+  if (!user) return res.status(401).json({ error: "Invalid access token" });
 
   req.user = user;
 
