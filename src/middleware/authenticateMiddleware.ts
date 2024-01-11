@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "../auth/utils/jwt";
+import {
+  verifyAccessToken,
+  verifyRefreshToken,
+  generateTokens,
+} from "../auth/utils/jwt";
 
 export const authenticate = (
   req: Request,
@@ -18,4 +22,24 @@ export const authenticate = (
   req.user = user;
 
   next();
+};
+
+export const refreshToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const refreshToken = req.body.refreshToken;
+
+  if (!refreshToken)
+    return res.status(401).json({ error: "Refresh token not provided" });
+
+  const user = verifyRefreshToken(refreshToken);
+
+  if (!user) return res.status(401).json({ error: "Invalid refresh token" });
+
+  const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+
+  // Send the new tokens to the client
+  res.json({ accessToken, refreshToken: newRefreshToken });
 };

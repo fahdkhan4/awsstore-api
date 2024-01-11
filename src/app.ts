@@ -6,6 +6,7 @@ import defaultRoutesHandler from "./middleware/defaultRoute.middleware";
 import connect from "./utils/connect";
 import logger from "./utils/logger";
 import routes from "./routes";
+import { isAdmin } from "./middleware/roleCheckerMiddleware";
 
 const port = config.get<number>("port");
 

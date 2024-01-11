@@ -4,25 +4,30 @@ import {
   login,
   updateUser,
   deleteUser,
+  refreshToken,
 } from "../auth/controllers/auth.controller";
-import { handleValidationErrors } from "./auth.validator";
 import { handleAsyncErrors } from "../helpers/route.helper";
 import { authenticate } from "../middleware/authenticateMiddleware";
+import {
+  loginValidatorMiddleware,
+  registerValidatorMiddleware,
+} from "./auth.validator";
 
 const router = Router();
 
-router.post("/register", handleAsyncErrors(register), handleValidationErrors);
+router.post(
+  "/register",
+  registerValidatorMiddleware,
+  handleAsyncErrors(register)
+);
 
-router.post("/login", handleAsyncErrors(login), handleValidationErrors);
+router.post("/login", loginValidatorMiddleware, handleAsyncErrors(login));
 
 //Needs Fixing
 router.put("/:username", authenticate, handleAsyncErrors(updateUser));
 
-router.delete(
-  "/:id",
-  authenticate,
-  handleAsyncErrors(deleteUser),
-  handleAsyncErrors
-);
+router.delete("/:id", authenticate, handleAsyncErrors(deleteUser));
+
+router.post("/refresh-token", handleAsyncErrors(refreshToken));
 
 export default router;

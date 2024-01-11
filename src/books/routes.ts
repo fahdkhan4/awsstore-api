@@ -8,31 +8,48 @@ import {
   deleteBookById,
   reviewBookById,
 } from "./controller/book.controller";
-import { createBookValidatorMiddleware } from "./book.validator";
+import {
+  createBookValidatorMiddleware,
+  getPaginatedBooksMiddleware,
+  updateBookValidatorMiddleware,
+} from "./book.validator";
 import { authenticate } from "../middleware/authenticateMiddleware";
+import { isAdmin } from "../middleware/roleCheckerMiddleware";
 
 const router = Router();
 
 //Create A Book
 router.post(
   "/",
-  [createBookValidatorMiddleware],
+  [authenticate, createBookValidatorMiddleware],
   handleAsyncErrors(createBook)
 );
 
 //Filter Through Books
-router.get("/", handleAsyncErrors(getPaginatedBooks));
+router.get(
+  "/",
+  [authenticate, getPaginatedBooksMiddleware],
+  handleAsyncErrors(getPaginatedBooks)
+);
 
 //Get a Book By Id
-router.get("/:id", handleAsyncErrors(getBookById));
+router.get("/:id", [authenticate], handleAsyncErrors(getBookById));
 
 //Update a Book By Id
-router.put("/:id", handleAsyncErrors(updateBookById));
+router.put(
+  "/:id",
+  [authenticate, updateBookValidatorMiddleware],
+  handleAsyncErrors(updateBookById)
+);
 
 //Delete a Book By Id
-router.delete("/:id", handleAsyncErrors(deleteBookById));
+router.delete("/:id", [authenticate], handleAsyncErrors(deleteBookById));
 
 //Admin Functions (Review Books)
-router.put("/review/:id", handleAsyncErrors(reviewBookById));
+router.put(
+  "/review/:id",
+  [isAdmin, authenticate],
+  handleAsyncErrors(reviewBookById)
+);
 
 export default router;

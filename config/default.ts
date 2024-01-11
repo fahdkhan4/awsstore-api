@@ -3,7 +3,7 @@ export default {
   dbUri: "mongodb://localhost:27017/aws-store",
   secretKey: "awsStoreNewBackend",
   saltWorkFactor: 10,
-  accessTokenTtl: "15m",
+  accessTokenTtl: "1440m",
   refreshTokenTtl: "1y",
   accessTokenPrivateKey: ``,
   accessTokenPublicKey: ``,
