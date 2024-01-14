@@ -3,6 +3,8 @@ import authRoutes from "./auth/routes";
 import userRoutes from "./users/routes";
 import categoryRoutes from "./categories/routes";
 import bookRoutes from "./books/routes";
+import document from "./documents/routes";
+import { firebaseStorageMiddleware } from "./middleware/firebase.middleware";
 
 const router = Router();
 
@@ -20,5 +22,8 @@ router.use("/categories", categoryRoutes);
 
 //Books
 router.use("/books", bookRoutes);
+
+//Documents
+router.use("/documents", firebaseStorageMiddleware, document);
 
 export default router;
