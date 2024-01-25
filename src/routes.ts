@@ -3,6 +3,7 @@ import authRoutes from "./auth/routes";
 import userRoutes from "./users/routes";
 import categoryRoutes from "./categories/routes";
 import bookRoutes from "./books/routes";
+import bookReview from "./bookReviews/routes";
 
 const router = Router();
 
@@ -20,5 +21,8 @@ router.use("/categories", categoryRoutes);
 
 //Books
 router.use("/books", bookRoutes);
+
+//Book Reviews
+router.use("/booksReview", bookReview);
 
 export default router;
