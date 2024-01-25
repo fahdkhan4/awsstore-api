@@ -5,6 +5,8 @@ import { CategoryModel } from "../../categories/model/category.model";
 
 const PAGE_SIZE = 50;
 
+// todo: Set Admin Restrictions on  services (isPublished, status)
+
 export class BookService {
   getBookPaginationQuery = ({
     query,

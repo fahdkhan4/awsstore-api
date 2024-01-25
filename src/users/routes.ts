@@ -13,10 +13,11 @@ const router = Router();
 
 router.get("/:id", authenticate, handleAsyncErrors(getUserById));
 
-router.get("", [isAdmin, authenticate], handleAsyncErrors(getAllUsers));
-
 router.put("/:id", authenticate, handleAsyncErrors(updateUser));
 
 router.delete("/:id", [isAdmin, authenticate], handleAsyncErrors(deleteUser));
+
+//Admin Functionality Only Get ALl Users
+router.get("", [isAdmin, authenticate], handleAsyncErrors(getAllUsers));
 
 export default router;

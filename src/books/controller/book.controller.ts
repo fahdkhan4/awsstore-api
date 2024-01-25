@@ -28,7 +28,6 @@ export const getPaginatedBooks = async (req: Request, res: Response) => {
     isPublic,
     isPublished,
     isDeleted,
-    review,
   } = req.query;
 
   const books = await bookService.getPaginatedBooksFromDB(

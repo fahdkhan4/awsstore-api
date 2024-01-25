@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
-import { generateAccessToken } from "../utils/jwt";
+import { generateTokens, verifyRefreshToken } from "../utils/jwt";
 
 const authService = new AuthService();
 
@@ -15,8 +15,8 @@ export const login = async (req: Request, res: Response) => {
   const user = await authService.login(email, password);
 
   if (user) {
-    const accessToken = generateAccessToken(user);
-    res.json({ accessToken });
+    const { accessToken, refreshToken } = generateTokens(user);
+    res.json({ accessToken, refreshToken });
   } else {
     res.status(401).json({ error: "Invalid credentials" });
   }
@@ -46,4 +46,20 @@ export const deleteUser = async (req: Request, res: Response) => {
   } else {
     res.status(404).json({ error: "User not found" });
   }
+};
+
+export const refreshToken = async (req: Request, res: Response) => {
+  const refreshToken = req.body.refreshToken;
+
+  if (!refreshToken)
+    return res.status(401).json({ error: "Refresh token not provided" });
+
+  const user = verifyRefreshToken(refreshToken);
+
+  if (!user) return res.status(401).json({ error: "Invalid refresh token" });
+
+  const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+
+  // Send the new tokens to the client
+  res.json({ accessToken, refreshToken: newRefreshToken });
 };

@@ -9,3 +9,23 @@ export const addProductCategoryValidatorMiddleware = celebrate({
     status: Joi.string().valid("publish", "draft", "deleted").required(),
   }),
 });
+
+export const updateProductCategoryValidatorMiddleware = celebrate({
+  [Segments.BODY]: Joi.object({
+    name: Joi.string(),
+    description: Joi.string().allow(""),
+    tags: Joi.array().items(Joi.string()),
+    status: Joi.string().valid("publish", "draft", "deleted"),
+  }),
+});
+
+export const getPaginatedProductCategoriesMiddleware = celebrate({
+  [Segments.QUERY]: Joi.object().keys({
+    pageNumber: Joi.number(),
+    size: Joi.number(),
+    name: Joi.string(),
+    tags: Joi.string(),
+    status: Joi.string().valid("publish", "draft", "deleted"),
+    lastObjectId: Joi.string(),
+  }),
+});
