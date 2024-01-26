@@ -12,6 +12,7 @@ import {
   loginValidatorMiddleware,
   registerValidatorMiddleware,
 } from "./auth.validator";
+import { captureUserInfoMiddleware } from "../middleware/captureUserInfo.middleware";
 
 const router = Router();
 
@@ -21,7 +22,11 @@ router.post(
   handleAsyncErrors(register)
 );
 
-router.post("/login", loginValidatorMiddleware, handleAsyncErrors(login));
+router.post(
+  "/login",
+  [loginValidatorMiddleware, captureUserInfoMiddleware],
+  handleAsyncErrors(login)
+);
 
 //Needs Fixing
 router.put("/:username", authenticate, handleAsyncErrors(updateUser));
