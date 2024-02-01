@@ -1,14 +1,44 @@
 import { Request, Response } from "express";
 import { BookService } from "../service/book.service";
+import { uploadToFirebase } from "../../documents/service/document.service";
 
 const bookService = new BookService();
 
-export const createBook = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const { authorId, genreId, ...bookData } = req.body;
-  const newBook = await bookService.createBook(authorId, genreId, bookData);
+export const createBook = async (req: Request & any, res: Response) => {
+  const { authorId, genreId, title, ...bookData } = req.body;
+  const bookSourceFile = req.files["bookSource"]
+    ? req.files["bookSource"][0]
+    : null;
+  const bookCoverImage = req.files["bookImageCover"]
+    ? req.files["bookImageCover"][0]
+    : null;
+
+  if (!bookSourceFile || !bookCoverImage) {
+    return res.status(400).send("Book source file or cover image is missing.");
+  }
+
+  const bookFileUrl = await uploadToFirebase(
+    req.firebaseStorage,
+    bookSourceFile,
+    "books",
+    authorId,
+    title
+  );
+  const bookImageCoverUrl = await uploadToFirebase(
+    req.firebaseStorage,
+    bookCoverImage,
+    "covers",
+    authorId,
+    title
+  );
+
+  const newBook = await bookService.createBook(authorId, genreId, {
+    ...bookData,
+    title: title,
+    bookFile: bookFileUrl,
+    bookImageCover: bookImageCoverUrl,
+  });
+
   res.status(201).json(newBook);
 };
 

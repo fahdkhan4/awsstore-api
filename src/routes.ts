@@ -21,7 +21,7 @@ router.use("/users", userRoutes);
 router.use("/categories", categoryRoutes);
 
 //Books
-router.use("/books", bookRoutes);
+router.use("/books", firebaseStorageMiddleware, bookRoutes);
 
 //Documents
 router.use("/documents", firebaseStorageMiddleware, document);
