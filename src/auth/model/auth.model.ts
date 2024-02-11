@@ -1,12 +1,5 @@
 import mongoose, { Model, Document } from "mongoose";
 import { generateRandomString } from "../../helpers/generateRandomString";
-
-export interface UserInfo {
-  userAgent: string;
-  deviceType: string;
-  lastLoginLocation: string;
-}
-
 export interface AuthDocument extends Document {
   _id: string;
   email: string;
@@ -15,7 +8,6 @@ export interface AuthDocument extends Document {
   fullName: string;
   role: "admin" | "user";
   accountType: "seller" | "user";
-  userInfo?: UserInfo;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,11 +47,6 @@ const authSchema = new mongoose.Schema<AuthDocument>({
   },
   role: { type: String, required: true, enum: ["admin", "user"] },
   accountType: { type: String, required: true, enum: ["seller", "user"] },
-  userInfo: {
-    userAgent: { type: String },
-    deviceType: { type: String },
-    lastLoginLocation: { type: String },
-  },
   createdAt: { type: Date },
   updatedAt: { type: Date },
 });

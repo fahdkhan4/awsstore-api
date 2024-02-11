@@ -7,10 +7,12 @@ export const createBookValidatorMiddleware = celebrate({
     genreId: Joi.string().required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
-    bookPrice: Joi.object().keys({
-      currency: Joi.string().required(),
-      amount: Joi.number().required(),
-    }),
+    // bookPrice: Joi.object().keys({
+    //   currency: Joi.string().required(),
+    //   amount: Joi.number().required(),
+    // }),
+    bookSource: Joi.optional(),
+    bookImageCover: Joi.optional(),
     pagesCount: Joi.number().required(),
     language: Joi.string().required(),
     publishYear: Joi.number().required(),

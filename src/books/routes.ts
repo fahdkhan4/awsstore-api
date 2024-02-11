@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { handleAsyncErrors } from "../helpers/route.helper";
+import multer from "multer";
 import {
   createBook,
   getPaginatedBooks,
@@ -17,11 +18,16 @@ import { authenticate } from "../middleware/authenticateMiddleware";
 import { isAdmin } from "../middleware/roleCheckerMiddleware";
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 //Create A Book
 router.post(
   "/",
-  [authenticate, createBookValidatorMiddleware],
+  [
+    upload.fields([{ name: "bookSource" }, { name: "bookImageCover" }]),
+    authenticate,
+    createBookValidatorMiddleware,
+  ],
   handleAsyncErrors(createBook)
 );
 
