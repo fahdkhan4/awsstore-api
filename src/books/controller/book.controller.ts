@@ -132,7 +132,7 @@ export const updateBookById = async (req: Request & any, res: Response) => {
   res.status(200).json(updatedBook);
 };
 
-export const deleteBookById = async (req: Request, res: Response) => {
+export const deleteBookById = async (req: Request & any, res: Response) => {
   const { id } = req.params;
 
   const deletedBook = await bookService.deleteBookById(id);

@@ -198,8 +198,6 @@ export class BookService {
         "Cannot review a book that is not in review or rejected status"
       );
 
-    console.log("isAdminApproved ", isAdminApproved);
-
     const newStatus = isAdminApproved ? "published" : "rejected";
 
     const updateDataWithReferences = {
