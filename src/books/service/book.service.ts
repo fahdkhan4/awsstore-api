@@ -159,30 +159,13 @@ export class BookService {
   // Update a book by ID
   updateBookById = async (
     bookId: string,
-    authorId: string,
-    genreId: string,
     updateData: Partial<BookDocument>
   ): Promise<BookDocument | null> => {
-    if (
-      !mongoose.Types.ObjectId.isValid(bookId) ||
-      !mongoose.Types.ObjectId.isValid(authorId) ||
-      !mongoose.Types.ObjectId.isValid(genreId)
-    )
-      throw new Error("Invalid bookId, authorId, or genreId");
+    if (!mongoose.Types.ObjectId.isValid(bookId))
+      throw new Error("Invalid bookId, ");
 
-    // Check if the corresponding documents (author and genre) exist
-    const [author, genre] = await Promise.all([
-      AuthModel.findById(authorId),
-      CategoryModel.findById(genreId),
-    ]);
-
-    if (!author || !genre) throw new Error("Author or genre not found");
-
-    // Assign the author and genre to the updateData
     const updateDataWithReferences = {
       ...updateData,
-      author: author._id,
-      genre: genre._id,
     };
 
     const updatedBook = await BookModel.findByIdAndUpdate(
@@ -214,8 +197,6 @@ export class BookService {
       throw new Error(
         "Cannot review a book that is not in review or rejected status"
       );
-
-    console.log("isAdminApproved ", isAdminApproved);
 
     const newStatus = isAdminApproved ? "published" : "rejected";
 

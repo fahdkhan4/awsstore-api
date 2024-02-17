@@ -44,7 +44,11 @@ router.get("/:id", [authenticate], handleAsyncErrors(getBookById));
 //Update a Book By Id
 router.put(
   "/:id",
-  [authenticate, updateBookValidatorMiddleware],
+  [
+    upload.fields([{ name: "bookSource" }, { name: "bookImageCover" }]),
+    authenticate,
+    updateBookValidatorMiddleware,
+  ],
   handleAsyncErrors(updateBookById)
 );
 
