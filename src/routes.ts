@@ -4,6 +4,7 @@ import userRoutes from "./users/routes";
 import categoryRoutes from "./categories/routes";
 import bookRoutes from "./books/routes";
 import document from "./documents/routes";
+import purchaseBookRoutes from "./payment/routes";
 import { firebaseStorageMiddleware } from "./middleware/firebase.middleware";
 
 const router = Router();
@@ -25,5 +26,8 @@ router.use("/books", firebaseStorageMiddleware, bookRoutes);
 
 //Documents
 router.use("/documents", firebaseStorageMiddleware, document);
+
+//BookPurchase
+router.use("/purchase", purchaseBookRoutes);
 
 export default router;

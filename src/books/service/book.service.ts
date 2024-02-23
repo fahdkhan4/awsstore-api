@@ -156,6 +156,21 @@ export class BookService {
     return book;
   };
 
+  //Get Books by Ids
+  getBooksByIds = async (bookIds: string[]): Promise<BookDocument[]> => {
+    const books = await BookModel.find({ _id: { $in: bookIds } })
+      .populate({
+        path: "author",
+        select: "-password -updatedAt",
+      })
+      .populate({
+        path: "genre",
+        select: "-updatedAt",
+      })
+      .exec();
+    return books;
+  };
+
   // Update a book by ID
   updateBookById = async (
     bookId: string,

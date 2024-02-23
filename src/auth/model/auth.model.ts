@@ -8,6 +8,9 @@ export interface AuthDocument extends Document {
   fullName: string;
   role: "admin" | "user";
   accountType: "seller" | "user";
+  accountBalance: number; // for seller
+  paidBooks: string[]; // for user
+  booksBought: string[]; // for seller
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +50,9 @@ const authSchema = new mongoose.Schema<AuthDocument>({
   },
   role: { type: String, required: true, enum: ["admin", "user"] },
   accountType: { type: String, required: true, enum: ["seller", "user"] },
+  accountBalance: { type: Number, default: 0 },
+  paidBooks: { type: [String], default: [] },
+  booksBought: { type: [String], default: [] },
   createdAt: { type: Date },
   updatedAt: { type: Date },
 });
