@@ -1,36 +1,45 @@
-//Purchase Book Model Logic
-import mongoose, { Model, Document, Schema, Types } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 import { BookDocument } from "../../books/model/book.model";
 import { AuthDocument } from "../../auth/model/auth.model";
 
-export interface BookPurchase {
+//todo: add buyerName, phone_number, email, created_at, transaction Id
+export interface BookItem {
   bookId: Types.ObjectId | BookDocument;
   quantity: number;
 }
 
-export interface PurchaseBookDocument extends Document {
+export interface TransactionData {
+  user: Types.ObjectId | string;
+  books: BookItem[];
+  paymentMode: string;
+  totalAmount: number;
+}
+export interface TransactionDocument extends Document {
   _id: string;
   user: Types.ObjectId | AuthDocument;
-  books: BookPurchase[];
+  books: BookItem[];
+  paymentMode: string;
   totalAmount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  transactionDate?: Date;
 }
 
-const BookPurchaseSchema = new Schema({
-  bookId: { type: String, required: true },
+const BookItemSchema = new Schema<BookItem>({
+  bookId: { type: Schema.Types.ObjectId, ref: "Book", required: true },
   quantity: { type: Number, required: true },
 });
 
-const PurchaseBookSchema = new Schema({
-  user: { type: String, required: true },
-  books: [BookPurchaseSchema],
-  totalAmount: { type: Number, required: true },
-  createdAt: { type: Date },
-  updatedAt: { type: Date },
-});
+const TransactionSchema = new Schema<TransactionDocument>(
+  {
+    user: { type: Schema.Types.ObjectId, ref: "Auth", required: true },
+    books: [BookItemSchema],
+    paymentMode: { type: String, required: true },
+    totalAmount: { type: Number, required: true },
+    transactionDate: { type: Date, default: Date.now },
+  },
+  { timestamps: true }
+);
 
-export const PurchaseBookModel = mongoose.model<PurchaseBookDocument>(
-  "PurchaseBook",
-  PurchaseBookSchema
+export const TransactionModel = mongoose.model<TransactionDocument>(
+  "BookTransaction",
+  TransactionSchema
 );

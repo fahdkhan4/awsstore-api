@@ -1,78 +1,88 @@
 import { Request, Response } from "express";
+import { BookTransactionService } from "../service/purchaseBookService";
+import { BookItem } from "../model/purchaseBookModel";
 import { BookService } from "../../books/service/book.service";
-import { UserService } from "../../users/service/user.service";
-import { PurchaseBookService } from "../service/purchaseBookService";
-const Flutterwave = require("flutterwave-node-v3");
 
-const publicKey = "FLWPUBK_TEST-7a2bbe12918b4723c06c5eccce75fd60-X";
-const secretKey = "FLWSECK_TEST-2e0e5d8f56f4e7be25041fb6f46b7187-X";
-
-let flutterwave = new Flutterwave(publicKey, secretKey);
-
+const bookTransactionService = new BookTransactionService();
 const bookService = new BookService();
-const userService = new UserService();
-const purchaseBookService = new PurchaseBookService();
 
 export const initiateBookPurchase = async (req: Request, res: Response) => {
-  const { userId, purchases } = req.body;
+  const { userId, books, paymentDetails } = req.body;
 
-  if (!userId) throw new Error("userId is missing in the request body");
-
-  const purchaseBookIds = purchases.map((purchase: any) => {
-    console.log("Purchase", purchase);
-    return purchase.bookId;
-  });
-
-  console.log(purchaseBookIds);
+  const purchaseBookIds = books.map((book: BookItem) => book.bookId);
   const booksFromDB = await bookService.getBooksByIds(purchaseBookIds);
 
-  const totalAmount = purchases.reduce((total: number, purchase: any) => {
+  const totalAmount = books.reduce((total: number, purchase: BookItem) => {
     const foundBook = booksFromDB.find(
-      (p) => p._id.toString() === purchase.bookId
+      (book) => book._id.toString() === purchase.bookId.toString()
     );
 
-    if (!foundBook) {
-      throw new Error("One of the products was not found");
-    }
+    if (!foundBook) throw new Error("One of the books was not found");
 
     const currentPrice = foundBook.bookPrice * purchase.quantity;
 
     return total + currentPrice;
   }, 0);
 
-  //get userId
-  const user = await userService.getUserById(userId);
-
-  //construct payment
-  const purchaseDate = new Date().toISOString().split("T")[0];
-  const paymentData = {
-    tx_ref: "test789",
-    amount: totalAmount,
-    currency: "GHS",
-    voucher: "143256743",
-    network: "VODAFONE",
-    email: "stefan.wexler@hotmail.eu",
-    phone_number: "054709929220",
-    fullname: "Yolande Aglaé Colbert",
-    client_ip: "154.123.220.1",
-    device_fingerprint: "62wd23423rq324323qew1",
-    meta: {
-      flightID: "213213AS",
-      anotherBanger: "Rema or Spyce :)",
-    },
+  paymentDetails.amount = totalAmount;
+  paymentDetails.meta = {
+    userId: userId,
+    books: books.map((item: BookItem) => ({
+      bookId: item.bookId,
+      quantity: item.quantity,
+    })),
+    totalAmount: totalAmount,
   };
 
-  const response = await flutterwave.MobileMoney.ghana(paymentData);
+  const paymentResponse = await bookTransactionService.initiatePayment(
+    paymentDetails
+  );
 
-  const createPurchaseBook = await purchaseBookService.addPurchaseToDB({
-    user: userId,
-    books: purchases,
-    totalAmount,
-  });
+  if (
+    paymentResponse.status === "success" &&
+    paymentResponse.meta.authorization.mode === "redirect"
+  ) {
+    return res.status(200).json({
+      message: "Please complete the CAPTCHA verification",
+      redirectUrl: paymentResponse.meta.authorization.redirect,
+    });
+  } else if (paymentResponse.status === "success") {
+    const transactionId = paymentResponse.meta.authorization.transaction_id;
 
-  res.status(200).json({ response, createPurchaseBook });
-};
+    const verificationResponse = await bookTransactionService.verifyPayment(
+      transactionId
+    );
 
-export const verifyPayment = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Payment Verified" });
+    if (verificationResponse.status === "success") {
+      const transactionData = {
+        user: userId,
+        books: books.map((item: BookItem) => ({
+          bookId: item.bookId,
+          quantity: item.quantity,
+        })),
+        paymentMode: "mobileMoney",
+        totalAmount: totalAmount,
+      };
+
+      // Pass this object to the createTransaction method.
+      const savedTransaction = await bookTransactionService.createTransaction(
+        transactionData
+      );
+
+      return res.status(200).json({
+        message: "Books purchased successfully",
+        data: savedTransaction,
+      });
+    } else {
+      return res.status(400).json({
+        message: "Payment verification failed",
+        details: verificationResponse,
+      });
+    }
+  } else {
+    return res.status(400).json({
+      message: "Payment initiation failed",
+      details: paymentResponse,
+    });
+  }
 };
