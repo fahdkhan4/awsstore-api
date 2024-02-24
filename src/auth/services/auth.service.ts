@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 export class AuthService {
   async register(user: AuthDocument): Promise<AuthDocument> {
     user.password = await bcrypt.hash(user.password, 10);
+
     return AuthModel.create(user);
   }
 
