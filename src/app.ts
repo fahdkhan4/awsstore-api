@@ -6,9 +6,11 @@ import defaultRoutesHandler from "./middleware/defaultRoute.middleware";
 import connect from "./utils/connect";
 import logger from "./utils/logger";
 import routes from "./routes";
-import { isAdmin } from "./middleware/roleCheckerMiddleware";
+import dotenv from "dotenv";
 
 const port = config.get<number>("port");
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());

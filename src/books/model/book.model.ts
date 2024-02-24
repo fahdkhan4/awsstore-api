@@ -10,10 +10,8 @@ export interface BookDocument extends Document {
   author: Types.ObjectId | AuthDocument; // Reference to the AuthModel
   genre: Types.ObjectId | CategoryDocument; //Reference to Category
   description: string;
-  // bookPrice: {
-  //   currency: string;
-  //   amount: number;
-  // };
+  bookPrice: number;
+  bookCurrency: string;
   bookFormate: string;
   bookFile: string;
   bookImageCover: string;
@@ -34,10 +32,8 @@ const BookSchema = new mongoose.Schema<BookDocument>({
   author: { required: true, type: Types.ObjectId, ref: "Auth" },
   genre: { required: true, type: Types.ObjectId, ref: "Book-Category" },
   description: { required: true, type: String },
-  // bookPrice: {
-  //   currency: { required: true, type: String },
-  //   amount: { required: true, type: Number, index: true },
-  // },
+  bookPrice: { required: true, type: Number },
+  bookCurrency: { required: true, type: String },
   bookFormate: {
     type: String,
   },

@@ -51,4 +51,66 @@ export class UserService {
       throw new Error(`Failed to delete user: ${error.message}`);
     }
   }
+
+  async updateSellerAccountBalance(
+    userId: string,
+    amount: number
+  ): Promise<void> {
+    try {
+      (await AuthModel.findByIdAndUpdate(userId, {
+        $inc: { accountBal: amount },
+      }).exec) &&
+        (await AuthModel.updateOne(
+          { _id: userId },
+          { $inc: { accountBal: amount } }
+        ).exec());
+      let user = await this.getUserById(userId);
+      if (user) {
+        user.accountBalance = (user.accountBalance ?? 0) + amount;
+        await user.save();
+      } else {
+        throw new Error("User not found");
+      }
+    } catch (err: any) {
+      throw new Error(
+        `Failed to update seller account balance: ${err.message}`
+      );
+    }
+  }
+
+  async updateBuyerBooksBought(
+    userId: string,
+    bookIds: string[]
+  ): Promise<void> {
+    try {
+      const user = await this.getUserById(userId);
+      if (user) {
+        await AuthModel.updateOne(
+          { _id: userId },
+          { $addToSet: { booksBought: { $each: bookIds } } }
+        );
+      } else {
+        throw new Error("User not found");
+      }
+    } catch (e: any) {
+      throw new Error(`Failed to update buyer books bought: ${e.message}`);
+    }
+  }
+
+  async updateSellerBooksSold(userId: string, bookId: string): Promise<void> {
+    try {
+      const user = await this.getUserById(userId);
+      if (user) {
+        if (!user.paidBooks) {
+          user.paidBooks = [];
+        }
+        user.paidBooks.push(bookId);
+        await user.save();
+      } else {
+        throw new Error("User not found");
+      }
+    } catch (e: any) {
+      throw new Error(`Failed to update seller books sold: ${e.message}`);
+    }
+  }
 }
