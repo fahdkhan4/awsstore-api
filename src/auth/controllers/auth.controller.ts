@@ -1,12 +1,25 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/auth.service";
 import { generateTokens, verifyRefreshToken } from "../utils/jwt";
+import { omit } from "lodash";
 
 const authService = new AuthService();
 
 export const register = async (req: Request, res: Response) => {
   const user = await authService.register(req.body);
-  res.status(201).json(user);
+  let filteredUser = user.toJSON();
+
+  if (user.accountType === "user") {
+    filteredUser = omit(filteredUser, [
+      "accountBalance",
+      "paidBooks",
+      "password",
+    ]);
+  } else {
+    filteredUser = omit(filteredUser, ["password"]);
+  }
+
+  res.status(201).json(filteredUser);
 };
 
 export const login = async (req: Request, res: Response) => {
