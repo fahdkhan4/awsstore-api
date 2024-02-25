@@ -1,6 +1,8 @@
 import mongoose, { Document, Query, Types } from "mongoose";
 import { CategoryDocument, CategoryModel } from "../model/category.model";
+import { UserService } from "../../users/service/user.service";
 
+const userService = new UserService();
 const PAGE_SIZE = 50;
 
 export class CategoryService {
@@ -85,8 +87,15 @@ export class CategoryService {
   };
 
   createCategory = async (
+    adminId: string,
     categoryData: Omit<CategoryDocument, "_id">
   ): Promise<CategoryDocument> => {
+    const admin = await userService.getUserById(adminId);
+
+    console.log("Admin ", admin);
+    if (admin?.role === "user" && admin?.accountType !== "admin")
+      throw new Error("User is not allowed, to create a new category");
+
     const category = await CategoryModel.create(categoryData);
     return category;
   };

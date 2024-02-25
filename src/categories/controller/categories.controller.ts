@@ -4,7 +4,10 @@ import { CategoryService } from "../service/category.service";
 const categoryService = new CategoryService();
 
 export const createCategory = async (req: Request, res: Response) => {
-  const category = await categoryService.createCategory(req.body);
+  const category = await categoryService.createCategory(
+    req.body.adminId,
+    req.body
+  );
   res.status(201).json(category);
 };
 
