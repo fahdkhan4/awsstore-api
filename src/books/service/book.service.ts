@@ -2,6 +2,7 @@ import mongoose, { Query } from "mongoose";
 import { BookDocument, BookModel } from "../model/book.model";
 import { AuthModel } from "../../auth/model/auth.model";
 import { CategoryModel } from "../../categories/model/category.model";
+import { sendBookCreationState } from "../../emails/books/sendBookCreationState.email";
 
 const PAGE_SIZE = 50;
 
@@ -56,10 +57,17 @@ export class BookService {
       ...bookData,
       author: author._id,
       genre: genre._id,
-      status: "review",
+      status: "published",
     };
 
     const book = await BookModel.create(bookWithReferences);
+
+    sendBookCreationState({
+      email: author.email as string,
+      bookTitle: book.title as string,
+      state: book.status as string,
+    });
+
     return book;
   };
 
