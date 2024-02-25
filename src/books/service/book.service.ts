@@ -49,6 +49,9 @@ export class BookService {
 
     if (!author || !genre) throw new Error("Author or genre not found");
 
+    if (author.accountType === "user")
+      throw new Error("Invalid authorId, only authors can create book");
+
     const bookWithReferences = {
       ...bookData,
       author: author._id,
