@@ -1,20 +1,20 @@
-import mongoose, { Model, Document, Schema, Types } from "mongoose";
+import mongoose, { Model, Document, Types } from "mongoose";
 import { AuthDocument } from "../../auth/model/auth.model";
 import { CategoryDocument } from "../../categories/model/category.model";
-
-// todo: Add file system to it(bookFormate, bookSource, bookCover)
 
 export interface BookDocument extends Document {
   _id: string;
   title: string;
   author: Types.ObjectId | AuthDocument; // Reference to the AuthModel
-  genre: Types.ObjectId | CategoryDocument; //Reference to Category
+  category: Types.ObjectId | CategoryDocument; //Reference to Category
   description: string;
-  bookPrice: number;
-  bookCurrency: string;
+  bookAmount: {
+    price: number;
+    currency: string;
+  };
   bookFormate: string;
-  bookFile: string;
-  bookImageCover: string;
+  bookFileUrl: string;
+  bookImageCoverUrl: string;
   pagesCount: number;
   language: string;
   publishYear: number;
@@ -30,18 +30,20 @@ export interface BookDocument extends Document {
 const BookSchema = new mongoose.Schema<BookDocument>({
   title: { required: true, type: String },
   author: { required: true, type: Types.ObjectId, ref: "Auth" },
-  genre: { required: true, type: Types.ObjectId, ref: "Book-Category" },
+  category: { required: true, type: Types.ObjectId, ref: "Book-Category" },
   description: { required: true, type: String },
-  bookPrice: { required: true, type: Number },
-  bookCurrency: { required: true, type: String },
+  bookAmount: {
+    price: { required: true, type: Number },
+    currency: { required: true, type: String },
+  },
   bookFormate: {
     type: String,
   },
-  bookFile: {
+  bookFileUrl: {
     required: true,
     type: String,
   },
-  bookImageCover: {
+  bookImageCoverUrl: {
     required: true,
     type: String,
   },

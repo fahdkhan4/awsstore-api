@@ -1,54 +1,47 @@
-import mongoose, { Query } from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { BookDocument, BookModel } from "../model/book.model";
 import { AuthModel } from "../../auth/model/auth.model";
 import { CategoryModel } from "../../categories/model/category.model";
 import { sendBookCreationState } from "../../emails/books/sendBookCreationState.email";
 
-const PAGE_SIZE = 50;
-
-// todo: Set Admin Restrictions on  services (isPublished, status)
+interface BookQueryParams {
+  page: number;
+  limit: number;
+  query: FilterQuery<BookDocument>;
+}
 
 export class BookService {
-  getBookPaginationQuery = ({
+  getBooks = async ({
+    page,
+    limit,
     query,
-    pageNumber = 1,
-    size = PAGE_SIZE,
-    lastObjectId,
-  }: {
-    query: Query<BookDocument[], BookDocument>;
-    pageNumber?: number;
-    size?: number;
-    lastObjectId?: string;
-  }) => {
-    const resultSize = size && size <= 50 ? size : PAGE_SIZE;
+  }: BookQueryParams): Promise<BookDocument[]> => {
+    const book = await BookModel.find(query)
+      .skip((page - 1) * limit)
+      .exec();
 
-    if (!lastObjectId && pageNumber) query.skip(resultSize * (pageNumber - 1));
-
-    if (lastObjectId)
-      query.gt("_id", new mongoose.Types.ObjectId(lastObjectId));
-
-    return query.limit(resultSize);
+    return book;
   };
 
   // Create a new book
   createBook = async (
     authorId: string,
-    genreId: string,
+    categoryId: string,
     bookData: Partial<BookDocument>
   ): Promise<BookDocument> => {
     if (
       !mongoose.Types.ObjectId.isValid(authorId) ||
-      !mongoose.Types.ObjectId.isValid(genreId)
+      !mongoose.Types.ObjectId.isValid(categoryId)
     )
-      throw new Error("Invalid authorId or genreId");
+      throw new Error("Invalid authorId or categoryId");
 
     // Check if the corresponding documents (author and genre) exist
-    const [author, genre] = await Promise.all([
+    const [author, category] = await Promise.all([
       AuthModel.findById(authorId),
-      CategoryModel.findById(genreId),
+      CategoryModel.findById(categoryId),
     ]);
 
-    if (!author || !genre) throw new Error("Author or genre not found");
+    if (!author || !category) throw new Error("Author or category not found");
 
     if (author.accountType === "user")
       throw new Error("Invalid authorId, only authors can create book");
@@ -56,7 +49,7 @@ export class BookService {
     const bookWithReferences = {
       ...bookData,
       author: author._id,
-      genre: genre._id,
+      category: category._id,
       status: "published",
     };
 
@@ -69,87 +62,6 @@ export class BookService {
     });
 
     return book;
-  };
-
-  // Get all books with pagination
-  getPaginatedBooksFromDB = async (
-    pageNumber: number = 1,
-    size: number = PAGE_SIZE,
-    status: string,
-    lastObjectId?: string,
-    title?: string,
-    author?: string,
-    genre?: string,
-    price?: { min?: number; max?: number },
-    pagesCount?: string,
-    language?: string,
-    publishYear?: string,
-    isPublic?: boolean,
-    isPublished?: boolean,
-    isDeleted?: boolean,
-    review?: string
-  ): Promise<BookDocument[]> => {
-    let queryFilter: Record<string, string | any> = { status };
-
-    // Additional filters
-    if (title) queryFilter = { ...queryFilter, title: new RegExp(title, "i") };
-
-    if (author) queryFilter = { ...queryFilter, author: author };
-    if (genre) queryFilter = { ...queryFilter, genre: genre };
-
-    if (price?.max || price?.min) {
-      let priceQuery = {};
-      if (price.min) {
-        priceQuery = { ...priceQuery, $gte: price.min };
-      }
-
-      // max price cannot be lower than min price
-      if (!price.min || (price.max && price?.max >= price.min)) {
-        priceQuery = { ...priceQuery, $lte: price.max };
-      }
-
-      queryFilter = {
-        ...queryFilter,
-        "bookPrice.amount": priceQuery,
-      };
-    }
-
-    if (pagesCount !== undefined) queryFilter = { ...queryFilter, pagesCount };
-
-    if (language !== undefined) queryFilter = { ...queryFilter, language };
-
-    if (publishYear !== undefined)
-      queryFilter = { ...queryFilter, publishYear };
-
-    if (isPublic !== undefined) queryFilter = { ...queryFilter, isPublic };
-
-    if (isPublished !== undefined)
-      queryFilter = { ...queryFilter, isPublished };
-
-    if (isDeleted !== undefined) queryFilter = { ...queryFilter, isDeleted };
-
-    if (review !== undefined) queryFilter = { ...queryFilter, review };
-
-    let query = BookModel.find(queryFilter);
-
-    const queryWithPagination = this.getBookPaginationQuery({
-      query,
-      pageNumber,
-      size,
-      lastObjectId,
-    });
-
-    const books = await queryWithPagination
-      .populate({
-        path: "author",
-        select: "-password -updatedAt",
-      })
-      .populate({
-        path: "genre",
-        select: "-updatedAt",
-      })
-      .exec();
-    return books;
   };
 
   // Get a book by ID
@@ -165,21 +77,6 @@ export class BookService {
       })
       .exec();
     return book;
-  };
-
-  //Get Books by Ids
-  getBooksByIds = async (bookIds: string[]): Promise<BookDocument[]> => {
-    const books = await BookModel.find({ _id: { $in: bookIds } })
-      .populate({
-        path: "author",
-        select: "-password -updatedAt",
-      })
-      .populate({
-        path: "genre",
-        select: "-updatedAt",
-      })
-      .exec();
-    return books;
   };
 
   // Update a book by ID
@@ -198,7 +95,7 @@ export class BookService {
       bookId,
       updateDataWithReferences,
       { new: true }
-    ).populate("author genre");
+    ).populate("author category");
 
     return updatedBook;
   };

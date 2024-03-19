@@ -1,65 +1,24 @@
 import { Router } from "express";
 import { handleAsyncErrors } from "../helpers/route.helper";
-import multer from "multer";
 import {
   createBook,
-  getPaginatedBooks,
-  getBookById,
-  updateBookById,
-  deleteBookById,
-  reviewBookById,
+  updateBook,
+  getBooks,
+  deleteBook,
 } from "./controller/book.controller";
-import {
-  createBookValidatorMiddleware,
-  getPaginatedBooksMiddleware,
-  updateBookValidatorMiddleware,
-} from "./book.validator";
-import { authenticate } from "../middleware/authenticateMiddleware";
-import { isAdmin } from "../middleware/roleCheckerMiddleware";
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
-//Create A Book
-router.post(
-  "/",
-  [
-    upload.fields([{ name: "bookSource" }, { name: "bookImageCover" }]),
-    authenticate,
-    createBookValidatorMiddleware,
-  ],
-  handleAsyncErrors(createBook)
-);
+//create a Book
+router.post("/", handleAsyncErrors(createBook));
 
-//Filter Through Books
-router.get(
-  "/",
-  [authenticate, getPaginatedBooksMiddleware],
-  handleAsyncErrors(getPaginatedBooks)
-);
+//update a Art
+router.put("/:id", handleAsyncErrors(updateBook));
 
-//Get a Book By Id
-router.get("/:id", [authenticate], handleAsyncErrors(getBookById));
+//get Arts
+router.get("/", getBooks);
 
-//Update a Book By Id
-router.put(
-  "/:id",
-  [
-    upload.fields([{ name: "bookSource" }, { name: "bookImageCover" }]),
-    authenticate,
-    updateBookValidatorMiddleware,
-  ],
-  handleAsyncErrors(updateBookById)
-);
-
-//Delete a Book By Id
-router.delete("/:id", [authenticate], handleAsyncErrors(deleteBookById));
-
-//Admin Functions (Review Books)
-router.put(
-  "/review/:id",
-  [isAdmin, authenticate],
-  handleAsyncErrors(reviewBookById)
-);
+//delete a Art
+router.delete("/:id", handleAsyncErrors(deleteBook));
 
 export default router;
