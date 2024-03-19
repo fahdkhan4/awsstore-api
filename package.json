@@ -25,7 +25,7 @@
     "mongoose": "^6.0.11",
     "multer": "^1.4.5-lts.1",
     "nanoid": "^3.1.30",
-    "nodemailer": "^6.9.10",
+    "nodemailer": "^6.9.12",
     "pino": "^7.0.2",
     "pino-pretty": "^7.1.0",
     "prom-client": "^14.0.0",

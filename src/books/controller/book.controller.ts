@@ -3,7 +3,6 @@ import { BookService } from "../service/book.service";
 import {
   uploadToFirebase,
   updateFirebaseFile,
-  deleteFirebaseFile,
 } from "../../documents/service/document.service";
 
 const bookService = new BookService();

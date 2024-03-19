@@ -92,7 +92,6 @@ export class CategoryService {
   ): Promise<CategoryDocument> => {
     const admin = await userService.getUserById(adminId);
 
-    console.log("Admin ", admin);
     if (admin?.role === "user" && admin?.accountType !== "admin")
       throw new Error("User is not allowed, to create a new category");
 
