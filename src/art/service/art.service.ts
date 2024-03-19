@@ -1,4 +1,4 @@
-import mongoose, { FilterQuery, Query } from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { ArtDocument, ArtModel } from "../model/art.model";
 import { AuthModel } from "../../auth/model/auth.model";
 import { CategoryModel } from "../../categories/model/category.model";
@@ -54,7 +54,6 @@ export class ArtService {
     )
       throw new Error("Invalid authorId or genreId");
 
-    console.log(artData);
     // Check if the corresponding documents (author and genre) exist
     const [author, category] = await Promise.all([
       AuthModel.findById(authorId),

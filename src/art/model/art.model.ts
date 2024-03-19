@@ -1,4 +1,4 @@
-import mongoose, { Model, Document, Schema, Types } from "mongoose";
+import mongoose, { Model, Document, Types } from "mongoose";
 import { AuthDocument } from "../../auth/model/auth.model";
 import { CategoryDocument } from "../../categories/model/category.model";
 
