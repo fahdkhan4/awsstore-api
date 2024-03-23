@@ -6,14 +6,23 @@ import {
   getBooks,
   deleteBook,
 } from "./controller/book.controller";
+import {
+  createBookValidatorMiddleware,
+  getBooksMiddleware,
+  updateBookValidatorMiddleware,
+} from "./book.validator";
 
 const router = Router();
 
 //create a Book
-router.post("/", handleAsyncErrors(createBook));
+router.post("/", createBookValidatorMiddleware, handleAsyncErrors(createBook));
 
 //update a Art
-router.put("/:id", handleAsyncErrors(updateBook));
+router.put(
+  "/:id",
+  updateBookValidatorMiddleware,
+  handleAsyncErrors(updateBook)
+);
 
 //get Arts
 router.get("/", getBooks);

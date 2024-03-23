@@ -3,21 +3,24 @@ import { celebrate, Segments } from "celebrate";
 
 export const createBookValidatorMiddleware = celebrate({
   [Segments.BODY]: Joi.object().keys({
-    authorId: Joi.string().required(),
-    genreId: Joi.string().required(),
     title: Joi.string().required(),
+    authorId: Joi.string().required(),
+    categoryId: Joi.string().required(),
     description: Joi.string().required(),
-    bookPrice: Joi.number().required(),
-    bookCurrency: Joi.string().required(),
-    bookSource: Joi.optional(),
-    bookImageCover: Joi.optional(),
-    pagesCount: Joi.number().required(),
+    bookAmount: Joi.object()
+      .keys({
+        price: Joi.number().required(),
+        currency: Joi.string().required(),
+      })
+      .required(),
+    bookFormate: Joi.string().optional(),
+    bookFileUrl: Joi.string().required(),
+    bookImageCoverUrl: Joi.string().required(),
+    pagesCount: Joi.number().optional(),
     language: Joi.string().required(),
     publishYear: Joi.number().required(),
-    isPublic: Joi.boolean().optional(),
     status: Joi.string().valid("draft", "review", "published", "rejected"),
     isPublished: Joi.boolean().optional(),
-    isDeleted: Joi.boolean().optional(),
     review: Joi.number().optional(),
   }),
 });
@@ -25,30 +28,49 @@ export const createBookValidatorMiddleware = celebrate({
 export const updateBookValidatorMiddleware = celebrate({
   [Segments.BODY]: Joi.object().keys({
     authorId: Joi.string(),
-    genreId: Joi.string(),
-    bookId: Joi.string(),
+    categoryId: Joi.string(),
     title: Joi.string(),
     description: Joi.string(),
-    bookPrice: Joi.object().keys({
+    bookAmount: Joi.object().keys({
       currency: Joi.string(),
-      amount: Joi.number(),
+      price: Joi.number(),
     }),
+    bookFormate: Joi.string(),
+    bookFileUrl: Joi.string(),
+    bookImageCoverUrl: Joi.string(),
     pagesCount: Joi.number(),
     language: Joi.string(),
     publishYear: Joi.number(),
-    isPublic: Joi.boolean(),
     status: Joi.string().valid("draft", "review", "published", "rejected"),
     isPublished: Joi.boolean(),
-    isDeleted: Joi.boolean(),
     review: Joi.number(),
   }),
 });
 
-export const getPaginatedBooksMiddleware = celebrate({
+export const getBooksMiddleware = celebrate({
   [Segments.QUERY]: Joi.object().keys({
-    pageNumber: Joi.number(),
-    size: Joi.number(),
-    status: Joi.string().valid("draft", "review", "published", "rejected"),
-    lastObjectId: Joi.string(),
+    page: Joi.number(),
+    limit: Joi.number(),
+    query: Joi.object({
+      _id: Joi.string(),
+      id: Joi.string(),
+      title: Joi.string(),
+      authorId: Joi.string(),
+      categoryId: Joi.string(),
+      description: Joi.string(),
+      bookAmount: Joi.object().keys({
+        price: Joi.number(),
+        currency: Joi.string(),
+      }),
+      bookFormate: Joi.string(),
+      bookFileUrl: Joi.string(),
+      bookImageCoverUrl: Joi.string(),
+      pagesCount: Joi.number(),
+      language: Joi.string(),
+      publishYear: Joi.number(),
+      status: Joi.string().valid("draft", "review", "published", "rejected"),
+      isPublished: Joi.boolean(),
+      review: Joi.number(),
+    }).unknown(true),
   }),
 });
