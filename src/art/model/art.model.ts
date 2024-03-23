@@ -13,10 +13,8 @@ export interface ArtDocument extends Document {
     currency: string;
   };
   artImage: string[];
-  isPublic: boolean;
   status: "draft" | "review" | "published" | "rejected" | "deleted";
   isPublished?: boolean;
-  isDeleted: boolean;
   review: number;
   createdAt: Date;
   updatedAt: Date;
@@ -41,9 +39,7 @@ const ArtSchema = new mongoose.Schema<ArtDocument>({
     enum: ["draft", "review", "published", "deleted"],
     default: "draft",
   },
-  isPublic: { type: Boolean, default: false },
-  isPublished: { type: Boolean, default: false },
-  isDeleted: { type: Boolean, default: false },
+  isPublished: { type: Boolean, default: true },
   review: { type: Number, default: 0 },
   createdAt: { type: Date },
   updatedAt: { type: Date },

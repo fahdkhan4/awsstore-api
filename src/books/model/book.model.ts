@@ -12,16 +12,14 @@ export interface BookDocument extends Document {
     price: number;
     currency: string;
   };
-  bookFormate: string;
+  bookFormate?: string;
   bookFileUrl: string;
   bookImageCoverUrl: string;
-  pagesCount: number;
+  pagesCount?: number;
   language: string;
   publishYear: number;
-  isPublic: boolean;
   status: "draft" | "review" | "published" | "rejected" | "deleted";
-  isPublished?: boolean;
-  isDeleted: boolean;
+  isPublished: boolean;
   review: number;
   createdAt: Date;
   updatedAt: Date;
@@ -56,9 +54,7 @@ const BookSchema = new mongoose.Schema<BookDocument>({
     enum: ["draft", "review", "published", "deleted"],
     default: "draft",
   },
-  isPublic: { type: Boolean, default: false },
   isPublished: { type: Boolean, default: false },
-  isDeleted: { type: Boolean, default: false },
   review: { type: Number, default: 0 },
   createdAt: { type: Date },
   updatedAt: { type: Date },
