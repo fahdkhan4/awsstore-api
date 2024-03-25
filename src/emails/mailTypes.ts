@@ -12,3 +12,10 @@ export interface TransportBookCreation {
   bookTitle: string;
   state: string;
 }
+
+export interface TransportCategoryCreation {
+  categoryTitle: string;
+  tags?: string[];
+  description?: string;
+  state: string;
+}
