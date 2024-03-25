@@ -1,6 +1,7 @@
 import mongoose, { FilterQuery } from "mongoose";
 import { CategoryDocument, CategoryModel } from "../model/category.model";
 import { UserService } from "../../users/service/user.service";
+import { sendCategoryCreationState } from "../../emails/categories/sendCategoryState.email";
 
 const userService = new UserService();
 interface BookQueryParams {
@@ -45,6 +46,12 @@ export class CategoryService {
     };
 
     const category = await CategoryModel.create(categoryWithReferences);
+
+    sendCategoryCreationState({
+      state: category.status as string,
+      categoryTitle: category.name as string,
+      tags: category.tags as string[],
+    });
 
     return category;
   };
