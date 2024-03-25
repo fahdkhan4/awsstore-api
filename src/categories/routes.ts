@@ -1,46 +1,24 @@
 import { Router } from "express";
-import {
-  createCategory,
-  getCategoryById,
-  getCategories,
-  updateCategory,
-  deleteCategory,
-} from "./controller/categories.controller";
-import { isAdmin } from "../middleware/roleCheckerMiddleware";
-import { authenticate } from "../middleware/authenticateMiddleware";
 import { handleAsyncErrors } from "../helpers/route.helper";
 import {
-  addProductCategoryValidatorMiddleware,
-  getPaginatedProductCategoriesMiddleware,
-  updateProductCategoryValidatorMiddleware,
-} from "./category.validator";
+  createCategory,
+  updateCategory,
+  getCategories,
+  deleteCategory,
+} from "./controller/categories.controller";
 
 const router = Router();
 
-router.post(
-  "",
-  [isAdmin, authenticate, addProductCategoryValidatorMiddleware],
-  handleAsyncErrors(createCategory)
-);
+//create a Category
+router.post("/", handleAsyncErrors(createCategory));
 
-router.get("/:id", authenticate, handleAsyncErrors(getCategoryById));
+//update a Category
+router.put("/:id", handleAsyncErrors(updateCategory));
 
-router.get(
-  "",
-  [authenticate, getPaginatedProductCategoriesMiddleware],
-  handleAsyncErrors(getCategories)
-);
+//get Categories
+router.get("/", handleAsyncErrors(getCategories));
 
-router.put(
-  "/:id",
-  [isAdmin, authenticate, updateProductCategoryValidatorMiddleware],
-  handleAsyncErrors(updateCategory)
-);
-
-router.delete(
-  "/:id",
-  [isAdmin, authenticate],
-  handleAsyncErrors(deleteCategory)
-);
+//delete a Category
+router.delete("/:id", handleAsyncErrors(deleteCategory));
 
 export default router;

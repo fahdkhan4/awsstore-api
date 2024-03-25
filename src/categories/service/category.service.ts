@@ -1,121 +1,82 @@
-import mongoose, { Document, Query, Types } from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { CategoryDocument, CategoryModel } from "../model/category.model";
 import { UserService } from "../../users/service/user.service";
 
 const userService = new UserService();
-const PAGE_SIZE = 50;
+interface BookQueryParams {
+  page: number;
+  limit: number;
+  query: FilterQuery<CategoryDocument>;
+}
 
 export class CategoryService {
-  getCategoryPaginationQuery = ({
+  getCategories = async ({
+    page,
+    limit,
     query,
-    pageNumber = 1,
-    size = PAGE_SIZE,
-    lastObjectId,
-  }: {
-    query: Query<CategoryDocument[], CategoryDocument>;
-    pageNumber?: number;
-    size?: number;
-    lastObjectId?: string;
-  }) => {
-    const resultSize = size && size <= 50 ? size : PAGE_SIZE;
-
-    if (!lastObjectId && pageNumber) query.skip(resultSize * (pageNumber - 1));
-
-    if (lastObjectId)
-      query.gt("_id", new mongoose.Types.ObjectId(lastObjectId));
-
-    return query.limit(resultSize);
-  };
-
-  getCategoryPaginatedFromDB = async ({
-    status,
-    name,
-    pageNumber = 1,
-    size = PAGE_SIZE,
-    tags,
-    lastObjectId,
-  }: {
-    status: string;
-    tags?: string[];
-    size?: number;
-    name?: string;
-    pageNumber?: number;
-    lastObjectId?: string;
-  }): Promise<Document[]> => {
-    let queryFilter: Record<string, string | any> = { status };
-
-    if (name) {
-      queryFilter = {
-        ...queryFilter,
-        name: new RegExp(name, "i"),
-      };
-    }
-
-    if (tags && Array.isArray(tags)) {
-      const tagsPattern = tags.map((tag) => `(${tag})`).join("|");
-      queryFilter.tags = new RegExp(tagsPattern, "i");
-    } else if (tags) {
-      queryFilter.tags = new RegExp(tags, "i");
-    }
-
-    let query = CategoryModel.find(queryFilter);
-
-    // Add additional conditions to the query
-    if (lastObjectId)
-      query = query.where("_id").gt(new Types.ObjectId(lastObjectId) as any);
-
-    const queryWithPagination = this.getCategoryPaginationQuery({
-      query,
-      size,
-      pageNumber,
-    });
-
-    const categories = await queryWithPagination.exec();
+  }: BookQueryParams): Promise<CategoryDocument[]> => {
+    const categories = await CategoryModel.find(query)
+      .skip((page - 1) * limit)
+      .exec();
 
     return categories;
   };
 
-  getCategoryById = async (categoryId: string) => {
-    let result = null;
-
-    try {
-      result = await CategoryModel.findOne({ _id: categoryId }).lean();
-    } catch (err) {
-      console.log(err);
-    }
-    return result;
-  };
-
+  // Create a new category
   createCategory = async (
     adminId: string,
-    categoryData: Omit<CategoryDocument, "_id">
+    categoryData: Partial<CategoryDocument>
   ): Promise<CategoryDocument> => {
+    if (!mongoose.Types.ObjectId.isValid(adminId))
+      throw new Error("Invalid adminId");
+
+    // Check if the corresponding documents (admin) exist
     const admin = await userService.getUserById(adminId);
 
-    if (admin?.role === "user" && admin?.accountType !== "admin")
-      throw new Error("User is not allowed, to create a new category");
+    if (!admin) throw new Error("Admin not found");
 
-    const category = await CategoryModel.create(categoryData);
+    if (admin.role !== "admin")
+      throw new Error("Invalid adminId, only admin can create category");
+
+    const categoryWithReferences = {
+      ...categoryData,
+      adminId: admin._id,
+      status: "publish",
+    };
+
+    const category = await CategoryModel.create(categoryWithReferences);
+
     return category;
   };
 
+  // Update a category by id
   updateCategory = async (
     categoryId: string,
-    updatedDetails: Partial<CategoryDocument>
+    updateData: Partial<CategoryDocument>
   ): Promise<CategoryDocument | null> => {
-    const category = await CategoryModel.findByIdAndUpdate(
+    if (!mongoose.Types.ObjectId.isValid(categoryId))
+      throw new Error("Invalid categoryId");
+
+    const updatedCategory = await CategoryModel.findByIdAndUpdate(
       categoryId,
-      {
-        ...updatedDetails,
-        updatedAt: new Date(),
-      },
+      updateData,
       { new: true }
     ).exec();
-    return category;
+
+    return updatedCategory;
   };
 
-  deleteCategory = async (categoryId: string): Promise<boolean> => {
-    const result = await CategoryModel.findByIdAndDelete(categoryId).exec();
-    return !!result;
+  // Delete a category by id
+  deleteCategory = async (
+    categoryId: string
+  ): Promise<CategoryDocument | null> => {
+    if (!mongoose.Types.ObjectId.isValid(categoryId))
+      throw new Error("Invalid categoryId");
+
+    const deletedCategory = await CategoryModel.findByIdAndDelete(
+      categoryId
+    ).exec();
+
+    return deletedCategory;
   };
 }
