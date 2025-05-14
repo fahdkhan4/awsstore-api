@@ -12,7 +12,7 @@ import {
   updateBookValidatorMiddleware,
 } from "./book.validator";
 
-const router = Router();
+const router = Router();        
 
 //create a Book
 router.post("/", createBookValidatorMiddleware, handleAsyncErrors(createBook));

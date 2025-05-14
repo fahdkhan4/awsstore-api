@@ -6,6 +6,7 @@ import { omit } from "lodash";
 const authService = new AuthService();
 
 export const register = async (req: Request, res: Response) => {
+  console.log("Request body:", req.body);
   const user = await authService.register(req.body);
   let filteredUser = user.toJSON();
 
@@ -18,8 +19,11 @@ export const register = async (req: Request, res: Response) => {
   } else {
     filteredUser = omit(filteredUser, ["password"]);
   }
-
-  res.status(201).json(filteredUser);
+  console.log("Filtered User:", filteredUser);
+  res.status(200).json({
+    success: true,
+    user: filteredUser
+});
 };
 
 export const login = async (req: Request, res: Response) => {
@@ -29,7 +33,19 @@ export const login = async (req: Request, res: Response) => {
 
   if (user) {
     const { accessToken, refreshToken } = generateTokens(user);
-    res.json({ accessToken, refreshToken });
+    // res.json({ accessToken, refreshToken });
+    res.json({
+    success: true,
+    jwt: {
+      token: accessToken,
+      refreshToken,
+      name: user.fullName,
+      account_type: user.role,
+      country: user.country || '',
+      user_id: user._id.toString(),
+      email: user.email,
+    },
+  });
   } else {
     res.status(401).json({ error: "Invalid credentials" });
   }

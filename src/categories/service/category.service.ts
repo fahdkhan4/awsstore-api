@@ -16,6 +16,7 @@ export class CategoryService {
     limit,
     query,
   }: BookQueryParams): Promise<CategoryDocument[]> => {
+    console.log("i got the request from favourite", query);
     const categories = await CategoryModel.find(query)
       .skip((page - 1) * limit)
       .exec();

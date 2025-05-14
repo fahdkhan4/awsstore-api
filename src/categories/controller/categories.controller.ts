@@ -11,7 +11,7 @@ export const createCategory = async (req: Request, res: Response) => {
   const newCategory = await categoryService.createCategory(
     adminId,
     categoryData
-  );
+  );  
 
   res.status(201).json(newCategory);
 };
@@ -35,18 +35,22 @@ export const getCategories = async (req: Request, res: Response) => {
   const { page = 1, limit = 10, ...query } = req.query;
   let id;
   if (query.id) id = query._id;
+  
 
   const queryParams: FilterQuery<CategoryDocument> = {};
-
+  
   Object.keys(query).forEach((key) => {
     queryParams[key] = query[key];
+    console.log("Query Params ->", queryParams[key]);
+  });
+  
+    const categories = await categoryService.getCategories({
+      page: parseInt(page as string),
+      limit: parseInt(limit as string),
+      query: queryParams,
   });
 
-  const categories = await categoryService.getCategories({
-    page: parseInt(page as string),
-    limit: parseInt(limit as string),
-    query: queryParams,
-  });
+  console.log("queries going to favourite", categories);
 
   res.status(200).json(categories);
 };

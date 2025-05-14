@@ -4,6 +4,7 @@ export const handleAsyncErrors =
   // eslint-disable-next-line @typescript-eslint/ban-types
   (fn: Function) => async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log("Request body:", req.body);
       await fn(req, res, next);
     } catch (error) {
       next(error);

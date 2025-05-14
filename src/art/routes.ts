@@ -15,19 +15,143 @@ import {
 
 const router = Router();
 
-//create a Art
+/**
+ * @openapi
+ * /arts:
+ *   post:
+ *     tags:
+ *       - Art
+ *     summary: Create a new art item
+ *     description: Creates a new art entry in the database
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateArtInput'
+ *     responses:
+ *       201:
+ *         description: Successfully created art
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Art'
+ *       400:
+ *         description: Validation error
+ */
 router.post("/", createArtValidatorMiddleware, handleAsyncErrors(createArt));
 
-//update a Art
+/**
+ * @openapi
+ * /arts/{id}:
+ *   put:
+ *     tags:
+ *       - Art
+ *     summary: Update an existing art item
+ *     description: Updates an art entry by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateArtInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated art
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Art'
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Art not found
+ */
 router.put("/:id", updateArtValidatorMiddleware, handleAsyncErrors(updateArt));
 
-//get a Art
+/**
+ * @openapi
+ * /arts/{id}:
+ *   get:
+ *     tags:
+ *       - Art
+ *     summary: Get a single art item
+ *     description: Fetches a specific art by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A single art object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Art'
+ *       404:
+ *         description: Art not found
+ */
 router.get("/:id", getArtsMiddleware, handleAsyncErrors(getArt));
 
-//get Arts
+/**
+ * @openapi
+ * /arts:
+ *   get:
+ *     tags:
+ *       - Art
+ *     summary: Get all art items
+ *     description: Returns a list of all available art items
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         default: 10
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *         default: 0
+ *     responses:
+ *       200:
+ *         description: A paginated list of art items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Art'
+ */
 router.get("/", getArtsMiddleware, getArts);
 
-//delete a Art
+/**
+ * @openapi
+ * /arts/{id}:
+ *   delete:
+ *     tags:
+ *       - Art
+ *     summary: Delete an art item
+ *     description: Deletes an art by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Successfully deleted
+ *       404:
+ *         description: Art not found
+ */
 router.delete("/:id", handleAsyncErrors(deleteArt));
 
 export default router;

@@ -7,6 +7,8 @@ import connect from "./utils/connect";
 import logger from "./utils/logger";
 import routes from "./routes";
 import dotenv from "dotenv";
+// 👇 Add this import
+import { setupSwagger } from "./swagger";
 
 const port = config.get<number>("port");
 
@@ -19,18 +21,20 @@ app.use(express.urlencoded({ extended: true }));
 app.listen(port, async () => {
   logger.info(`App is running at http://localhost:${port}`);
 
-  //Database Connection
   await connect();
 
-  //Routes
+  // Register all routes
   app.use((req: Request, res: Response, next: NextFunction) => {
     routes(req, res, next);
   });
 
-  //UnKnown Routing
+  // Setup Swagger
+  setupSwagger(app);
+
+  // Unknown route handler
   app.all("*", defaultRoutesHandler);
 
-  //Error Handling
+  // Error handling
   app.use(errors());
   app.use(errorMiddleware);
 });

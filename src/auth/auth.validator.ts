@@ -14,6 +14,7 @@ export const registerValidatorMiddleware = celebrate({
     password: Joi.string().required(),
     fullName: Joi.string().required(),
     username: Joi.string().required(),
+    mobile_money_number: Joi.string().required(),
     role: Joi.string().default("user"),
     accountType: Joi.string().required(),
   }),
