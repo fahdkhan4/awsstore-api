@@ -9,13 +9,35 @@ import routes from "./routes";
 import dotenv from "dotenv";
 // 👇 Add this import
 import { setupSwagger } from "./swagger";
+import cors from 'cors';
+import { CategoryService } from "./categories/service/category.service"
+import { AuthService } from "./auth/services/auth.service";
 
 const port = config.get<number>("port");
+const categoryService = new CategoryService();
+const authAService = new AuthService();
+
+const allowedOrigins = ['http://localhost:57368','http://localhost:56871'];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // If you're using cookies or auth headers
+};
+
+
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
 app.listen(port, async () => {
@@ -37,4 +59,7 @@ app.listen(port, async () => {
   // Error handling
   app.use(errors());
   app.use(errorMiddleware);
+  await authAService.addAdminUser();
+  await authAService.addSellerUser();
+  categoryService.seedBookCategories()
 });

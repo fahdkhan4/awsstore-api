@@ -46,4 +46,74 @@ export class AuthService {
     const result = await AuthModel.deleteOne({ _id: id });
     return result.deletedCount === 1;
   }
+
+  async addAdminUser(): Promise<void> {
+    const staticId = '68279869690bdf705ac33227';
+
+    try {
+      const existingAdmin = await AuthModel.findById(staticId);
+
+      if (existingAdmin) {
+        console.log('Admin user already exists.');
+        return;
+      }
+
+      const password = 'admin';
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const adminUser = new AuthModel({
+        _id: staticId,
+        email: "admin@gmail.com",
+        password: hashedPassword,
+        username: "admin",
+        fullName: "admin",
+        role: "admin",
+        accountType: 'admin'
+      });
+
+      await adminUser.save();
+
+      console.log('Admin user added successfully.');
+
+    } catch (error) {
+      console.error('Error adding admin user:', error);
+    }
+  }
+
+  async addSellerUser(): Promise<void> {
+    const staticId = '68279869690bdf705ac33229';
+
+    try {
+      const existingAdmin = await AuthModel.findById(staticId);
+
+      if (existingAdmin) {
+        console.log('Seller user already exists.');
+        return;
+      }
+
+      const password = 'test';
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const adminUser = new AuthModel({
+        _id: staticId,
+        email: "test@gmail.com",
+        password: hashedPassword,
+        username: "admin",
+        fullName: "admin",
+        role: "user",
+        accountType: 'seller'
+      });
+
+      await adminUser.save();
+
+      console.log('seller user added successfully.');
+
+    } catch (error) {
+      console.error('Error adding seller user:', error);
+    }
+  }
+
+  
 }
